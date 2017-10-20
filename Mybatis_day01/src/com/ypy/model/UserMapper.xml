@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ypy.model.UserModel">   <!-- 为了保证唯一，一般写为文件路径 -->
+	<!-- 查询所有记录 -->
+	<select id="query" resultType="UserModel">   <!-- id要求唯一 -->
+		select * from t_user
+	</select>
+	
+	<!-- 根据主键查询单条记录 -->
+	<select id="queryById" parameterType="int" resultType="com.ypy.model.UserModel">
+		select * from t_user where userid = #{userid}
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="save" parameterType="com.ypy.model.UserModel">
+		insert into 
+			t_user (userid,username,password)
+		values 
+			(seq_t_user.nextval,#{username},#{password})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.ypy.model.UserModel">
+		update t_user
+			set username = #{username},password = #{password}
+		where
+			userid = #{userid}
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		delete from t_user where userid = #{userid}
+	</delete>
+</mapper>
