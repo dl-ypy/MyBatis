@@ -4,9 +4,78 @@
 		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ypy.model.UserModel">   <!-- 为了保证唯一，一般写为文件路径 -->
+	
+	<!-- sql代码块 -->
+	<sql id="baseSql">
+		userid,username,password
+	</sql>
+	
 	<!-- 查询所有记录 -->
 	<select id="query" resultType="UserModel">   <!-- id要求唯一 -->
-		select * from t_user
+		select 
+		<include refid="baseSql"></include>
+		 from t_user
+		 <where>     <!-- where标签的作用相当于where 1=1 -->
+			 <if test="userid!=0">
+			 	and userid = #{userid}
+			 </if>
+			 <if test="username!=null">
+			 	and username like #{username}
+			 </if>
+			 <if test="password!=null">
+			 	and password = #{password}
+			 </if>
+		 </where>
+	</select>
+	
+	<!-- 有优先级的查询 ，相当于switch语句-->
+	<select id="query1" resultType="UserModel" parameterType="UserModel">
+		select
+		<include refid="baseSql"></include>
+		 from t_user
+		 <where>
+			 <choose>
+			 	<when test="username!=null">
+			 		and username like #{username}
+			 	</when>
+			 	<when test="password!=null">
+			 		and password=#{password}
+			 	</when>
+			 	<otherwise>
+			 		order by id desc
+			 	</otherwise>
+			 </choose>
+		 </where>
+	</select>
+	
+	<!-- in条件查询 -->
+	<select id="query2" parameterType="UserModel" resultType="UserModel">
+		select
+		<include refid="baseSql"></include>
+		from t_user
+		<where>
+			<if test="idList!=null">
+				and userid in
+				<foreach collection="idList" open="(" separator="," close=")" item="id">
+					#{id}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<!-- 配置resultMap，查询别名时使用 -->
+	<resultMap type="UserModel" id="baseMap">
+		<id column="id" property="userid"/>  <!-- 只有主键用id -->
+		<result column="name" property="username"/>
+		<result column="pwd" property="password"/>
+	</resultMap>
+	<select id="query3" parameterType="UserModel" resultMap="baseMap">
+		select
+			userid id,
+			username name,
+			password pwd
+		from
+			t_user
 	</select>
 	
 	<!-- 根据主键查询单条记录 -->
@@ -16,16 +85,27 @@
 	
 	<!-- 添加 -->
 	<insert id="save" parameterType="com.ypy.model.UserModel">
+		<!-- 在标签中写主键生成的逻辑 ,keyProperty必须用字段名-->
+		<selectKey keyProperty="userid" resultType="int" order="BEFORE">  <!-- order表示在添加语句执行之前执行 -->
+			select seq_t_user.nextval from dual
+		</selectKey>
 		insert into 
 			t_user (userid,username,password)
 		values 
-			(seq_t_user.nextval,#{username},#{password})
+			(#{userid},#{username},#{password})
 	</insert>
 	
 	<!-- 修改 -->
 	<update id="update" parameterType="com.ypy.model.UserModel">
 		update t_user
-			set username = #{username},password = #{password}
+		<set>   <!-- 会自动去掉最后一个逗号 -->
+			<if test="username!=null">
+				username=#{username},
+			</if>
+			<if test="password!=null">
+				password=#{password},
+			</if>
+		</set>
 		where
 			userid = #{userid}
 	</update>
