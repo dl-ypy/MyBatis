@@ -26,7 +26,7 @@ public class UserTest {
 		UserModel user = new UserModel();
 		user.setUsername("%¸Ä");
 		user.setPassword("111");
-		List<UserModel> list = session.selectList("com.ypy.model.UserModel.query", user);
+		List<UserModel> list = session.selectList("com.ypy.model.UserMapper.query", user);
 		for (UserModel userModel : list) {
 			System.out.println(userModel);
 		}

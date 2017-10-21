@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ypy.model.UserMapperLazy">   <!-- 为了保证唯一，一般写为文件路径 -->
+	<!-- 设置二级缓存 -->
+	<cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+	
+	<resultMap type="UserModel" id="baseMap">
+		<id column="userid" property="userid"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		
+		<!-- 配置员工对部门一对一 -->
+		<!-- 
+			select属性表示延迟加载时要执行的sql查询
+			column属性表示执行select的查询时，传入的参数
+		 -->
+		<association property="dept" javaType="DepartMentModel"
+			select="findById" column="did">
+			<id column="did" property="did"/>
+			<result column="dname" property="dname"/>
+		</association>
+	</resultMap>
+	
+	<select id="queryOne" resultMap="baseMap" parameterType="UserModel">
+		select
+			userid,
+			username,
+			password,
+			did
+		from 
+			t_user
+	</select>
+	
+	<select id="findById" resultType="DepartMentModel" parameterType="int">
+		select
+			did,
+			dname
+		from 
+			t_department
+		where did = #{did}
+	</select>
+</mapper>

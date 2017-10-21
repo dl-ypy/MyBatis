@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ypy.model.DepartMentMapper">   <!-- 为了保证唯一，一般写为文件路径 -->
+	
+	<resultMap type="DepartMentModel" id="baseMap">
+		<id column="did" property="did"/>
+		<result column="dname" property="dname"/>
+		
+		<!-- 配置部门对员工的多对一 -->
+		<collection property="list" ofType="UserModel"> <!-- 设置泛型的类型 -->
+			<id column="userid" property="userid"/>
+			<result column="username" property="username"/>
+			<result column="password" property="password"/>
+		</collection>
+	</resultMap>
+	
+	<select id="queryOne2Many" resultMap="baseMap" parameterType="DepartMentModel">
+		select
+	      d.did,
+	      d.dname,
+	      t.userid,
+	      t.username,
+	      t.password
+	    from 
+	      t_department d
+	    left join 
+	      t_user t
+	    on 
+	      t.did = d.did
+	</select>
+</mapper>
